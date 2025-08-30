@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Courtroom Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+        
+        :root {
+            --primary: #003566;
+            --primary-light: #c1cdf6;
+            --secondary: #0e4c8a;
+            --accent: #ff9e1a;
+            --light: #ffffff;
+            --light-gray: #f8fafc;
+            --mid-gray: #e2e8f0;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #0d9488;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #f0f7ff, #e6f0ff);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* 3D Background Elements */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-element {
+            position: absolute;
+            background: rgba(26, 86, 219, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        .floating-element:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+            background: rgba(26, 86, 219, 0.1);
+        }
+        
+        .floating-element:nth-child(2) {
+            width: 100px;
+            height: 100px;
+            top: 20%;
+            right: 15%;
+            animation-delay: -2s;
+            background: rgba(14, 76, 138, 0.1);
+        }
+        
+        .floating-element:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            bottom: 20%;
+            left: 15%;
+            animation-delay: -5s;
+            background: rgba(255, 158, 26, 0.1);
+        }
+        
+        .floating-element:nth-child(4) {
+            width: 70px;
+            height: 70px;
+            bottom: 15%;
+            right: 10%;
+            animation-delay: -7s;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        
+        .floating-element:nth-child(5) {
+            width: 90px;
+            height: 90px;
+            top: 50%;
+            left: 5%;
+            animation-delay: -10s;
+            background: rgba(13, 148, 136, 0.1);
+        }
+        
+        /* 3D Icons */
+        .floating-icon {
+            position: absolute;
+            font-size: 2.2rem;
+            color: rgba(26, 86, 219, 0.15);
+            animation: float-icon 20s infinite ease-in-out;
+            z-index: -1;
+        }
+        
+        .floating-icon:nth-child(1) {
+            top: 15%;
+            left: 5%;
+            animation-delay: 0s;
+            color: rgba(26, 86, 219, 0.2);
+        }
+        
+        .floating-icon:nth-child(2) {
+            top: 25%;
+            right: 7%;
+            animation-delay: -3s;
+            color: rgba(26, 86, 219, 0.15);
+        }
+        
+        .floating-icon:nth-child(3) {
+            bottom: 25%;
+            left: 7%;
+            animation-delay: -6s;
+            color: rgba(26, 86, 219, 0.15);
+        }
+        
+        /* Animations */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                border-radius: 10px;
+            }
+            33% {
+                transform: translateY(-20px) rotate(3deg) scale(1.05);
+                border-radius: 15px;
+            }
+            66% {
+                transform: translateY(20px) rotate(-3deg) scale(0.95);
+                border-radius: 20px;
+            }
+        }
+        
+        @keyframes float-icon {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            33% {
+                transform: translateY(-30px) rotate(10deg) scale(1.1);
+            }
+            66% {
+                transform: translateY(30px) rotate(-10deg) scale(0.9);
+            }
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 1.8rem 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+            z-index: 10;
+            border-bottom: 2px solid var(--accent);
+        }
+        
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--light);
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 1px;
+        }
+        
+        /* Main Content */
+        main {
+            padding: 3.5rem 1rem;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .hero-section {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            padding: 3.5rem 2.5rem;
+            background: var(--light);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            transform-style: preserve-3d;
+            transform: perspective(1000px) rotateX(5deg);
+            transition: transform 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--mid-gray);
+        }
+        
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+        }
+        
+        .hero-section:hover {
+            transform: perspective(1000px) rotateX(0deg);
+        }
+        
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 1.2rem;
+            color: var(--secondary);
+        }
+        
+        p {
+            font-size: 1.15rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+        }
+        
+        /* Upload Form */
+        .upload-form {
+            background: var(--light);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 3.5rem;
+            transform: translateZ(20px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--mid-gray);
+        }
+        
+        .upload-form::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+        
+        .upload-form:hover {
+            transform: translateZ(30px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .file-upload-container {
+            margin-bottom: 2.5rem;
+        }
+        
+        .file-upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3.5rem 2.5rem;
+            border: 3px dashed var(--primary);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--light-gray);
+        }
+        
+        .file-upload-label:hover {
+            background: var(--primary-light);
+            border-color: var(--secondary);
+        }
+        
+        .file-upload-label.highlight {
+            background: var(--primary-light);
+            border-color: var(--secondary);
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            margin-bottom: 1.2rem;
+            color: var(--primary);
+            font-size: 3.5rem;
+        }
+        
+        #file-name {
+            font-size: 1.15rem;
+            color: var(--text);
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        #file-upload {
+            display: none;
+        }
+        
+        /* Button Styles */
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            width: 100%;
+            padding: 1.4rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(26, 86, 219, 0.25);
+            transform: translateZ(0);
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) translateZ(10px);
+            box-shadow: 0 10px 30px rgba(26, 86, 219, 0.35);
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0) translateZ(0);
+            box-shadow: 0 3px 15px rgba(26, 86, 219, 0.25);
+        }
+        
+        /* Features Section */
+        .features {
+            margin-top: 4.5rem;
+        }
+        
+        .features h3 {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.3rem;
+            margin-bottom: 2.5rem;
+            color: var(--secondary);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+        }
+        
+        .feature-card {
+            background: var(--light);
+            padding: 3rem 2.2rem;
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--mid-gray);
+        }
+        
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px) translateZ(20px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.8rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(26, 86, 219, 0.25);
+        }
+        
+        .feature-card h4 {
+            font-size: 1.4rem;
+            margin-bottom: 1.2rem;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        
+        .feature-card p {
+            color: var(--text-light);
+            font-size: 1.05rem;
+        }
+        
+        /* Legal Image Section */
+        .legal-image {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), 
+                        url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            border-radius: 18px;
+            margin: 3.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--mid-gray);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .legal-image::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(26, 86, 219, 0.1), rgba(14, 76, 138, 0.1));
+            z-index: 1;
+        }
+        
+        .legal-image span {
+            position: relative;
+            z-index: 2;
+            font-weight: bold;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--light);
+            color: var(--text);
+            text-align: center;
+            padding: 2.5rem;
+            margin-top: 4rem;
+            border-top: 1px solid var(--mid-gray);
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        footer p {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.3rem;
+            }
+            
+            h2 {
+                font-size: 2rem;
+            }
+            
+            .hero-section, .upload-form {
+                padding: 2rem 1.5rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .floating-element, .floating-icon {
+                display: none;
+            }
+            
+            .legal-image {
+                height: 180px;
+                font-size: 1.7rem;
+            }
+            
+            .feature-card {
+                padding: 2.5rem 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 3D Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        
+        <i class="floating-icon fas fa-balance-scale"></i>
+        
+    </div>
+    
+    <header>
+        <h1>⚖️ AI Courtroom Assistant</h1>
+    </header>
+    
+    <main>
+        <div class="container">
+            <div class="hero-section">
+                <h2>Transform Legal Documents into Actionable Insights</h2>
+                <p>Upload your legal documents to receive comprehensive analysis, IPC section detection, and draft petition generation with our advanced AI-powered legal assistant.</p>
+            </div>
+            
+            <form action="/process/" method="post" enctype="multipart/form-data" class="upload-form">
+                <div class="file-upload-container">
+                    <label for="file-upload" class="file-upload-label">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <span id="file-name">Choose legal document or drag & drop here</span>
+                    </label>
+                    <input type="file" name="file" id="file-upload" required accept=".pdf,.doc,.docx,.txt">
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                    <span>Upload & Analyze</span>
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+            
+            <div class="legal-image">
+                <span>Justice and Law Analysis Powered by AI</span>
+            </div>
+            
+            <div class="features">
+                <h3>How It Works</h3>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">1</div>
+                        <h4>Upload Document</h4>
+                        <p>Upload your legal document in PDF, DOC, or text format securely</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">2</div>
+                        <h4>AI Analysis</h4>
+                        <p>Our advanced system analyzes the content for key legal elements and patterns</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">3</div>
+                        <h4>Generate Report</h4>
+                        <p>Receive comprehensive legal analysis, IPC sections, and recommendations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>⚠️ This tool provides preliminary analysis only and does not constitute legal advice. For official legal help, please consult qualified legal professionals or free legal aid services.</p>
+    </footer>
+
+    <script>
+        // File upload name display
+        document.getElementById('file-upload').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || 'Choose legal document or drag & drop here';
+            document.getElementById('file-name').textContent = fileName;
+        });
+        
+        // Drag and drop functionality
+        const fileUpload = document.getElementById('file-upload');
+        const fileUploadLabel = document.querySelector('.file-upload-label');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileUploadLabel.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileUploadLabel.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileUploadLabel.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            fileUploadLabel.classList.add('highlight');
+        }
+        
+        function unhighlight() {
+            fileUploadLabel.classList.remove('highlight');
+        }
+        
+        fileUploadLabel.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileUpload.files = files;
+            document.getElementById('file-name').textContent = files[0].name;
+        }
+        
+        // Add subtle parallax effect on mouse move
+        document.addEventListener('mousemove', function(e) {
+            const floatingElements = document.querySelectorAll('.floating-element, .floating-icon');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            floatingElements.forEach(function(element, index) {
+                const speed = 0.01 + (index * 0.005);
+                const xOffset = (x - 0.5) * speed * 100;
+                const yOffset = (y - 0.5) * speed * 100;
+                
+                element.style.transform = `translate(${xOffset}px, ${yOffset}px) ${element.style.transform.split(' ').slice(2).join(' ')}`;
+            });
+        });
+    </script>
+</body>
+</html>

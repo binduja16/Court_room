@@ -1,0 +1,34 @@
+{
+  "302": {
+    "description": "Punishment for murder",
+    "law": "IPC"
+  },
+  "376": {
+    "description": "Punishment for rape",
+    "law": "IPC"
+  },
+  "354": {
+    "description": "Assault or criminal force on woman with intent to outrage modesty",
+    "law": "IPC"
+  },
+  "420": {
+    "description": "Cheating and dishonestly inducing delivery of property",
+    "law": "IPC"
+  },
+  "406": {
+    "description": "Criminal breach of trust",
+    "law": "IPC"
+  },
+  "379": {
+    "description": "Punishment for theft",
+    "law": "IPC"
+  },
+  "411": {
+    "description": "Dishonestly receiving stolen property",
+    "law": "IPC"
+  },
+  "506": {
+    "description": "Criminal intimidation",
+    "law": "IPC"
+  }
+}

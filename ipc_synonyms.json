@@ -1,0 +1,10 @@
+{
+  "302": ["murder", "killed", "homicide", "fatal injuries", "death caused"],
+  "376": ["rape", "sexual assault", "molested"],
+  "354": ["outrage modesty", "molestation", "sexual harassment"],
+  "420": ["cheated", "fraud", "scam"],
+  "406": ["breach of trust", "embezzlement", "misappropriation"],
+  "506": ["criminal intimidation", "threatened", "blackmail"],
+  "379": ["theft", "stolen", "robbed"],
+  "392": ["robbery", "snatched", "loot"]
+}
